@@ -12,6 +12,7 @@
     "issues": "https://github.com/Noryea/motionblur-fabric/issues"
   },
   "license": "GPL-3.0",
+  "icon": "assets/motionblur/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": [
