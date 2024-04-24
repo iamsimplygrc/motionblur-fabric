@@ -139,7 +139,7 @@ public class SimpleConfig {
         String identifier = "Config '" + request.filename + "'";
 
         if( !request.file.exists() ) {
-            LOGGER.info( identifier + " is missing, generating default one..." );
+            //LOGGER.info( identifier + " is missing, generating default one..." );
 
             try {
                 createConfig();
@@ -245,7 +245,6 @@ public class SimpleConfig {
      * @return true if the operation was successful
      */
     public boolean delete() {
-        LOGGER.warn( "Config '" + request.filename + "' was removed from existence! Restart the game to regenerate it." );
         return request.file.delete();
     }
 
