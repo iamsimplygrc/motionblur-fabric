@@ -35,11 +35,12 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class SimpleConfig {
 
     private static final Logger LOGGER = LogManager.getLogger("SimpleConfig");
-    private final HashMap<String, String> config = new HashMap<>();
+    private final Map<String, String> config = new TreeMap<>();
     private final ConfigRequest request;
     private boolean broken = false;
 
@@ -111,16 +112,9 @@ public class SimpleConfig {
         Files.createFile(request.file.toPath());
 
         // write default config data
-        try {
-
-            PrintWriter writer = new PrintWriter(request.file, "UTF-8");
-            writer.write(request.getConfig());
-            writer.close();
-        } catch (FileNotFoundException e) {
-            throw new FileNotFoundException();
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        PrintWriter writer = new PrintWriter(request.file, "UTF-8");
+        writer.write(request.getConfig());
+        writer.close();
 
     }
 
@@ -144,6 +138,7 @@ public class SimpleConfig {
 
     private void updateWithProvider(MotionBlurConfigProvider configProvider) {
         request.provider = configProvider;
+        delete();
         try {
             createConfig();
         } catch (IOException e) {
@@ -151,7 +146,6 @@ public class SimpleConfig {
             LOGGER.trace(e);
             broken = true;
         }
-        delete();
     }
 
     private SimpleConfig(ConfigRequest request) {
