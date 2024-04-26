@@ -41,7 +41,7 @@ public class MotionBlurMod implements ClientModInitializer {
     }
 
     private static int changeAmount(FabricClientCommandSource src, int amount) {
-        MotionBlurConfig.update(amount);
+        MotionBlurConfig.setMotionBlurAmount(amount);
         //MotionBlurConfig.MOTIONBLUR_AMOUNT = amount;
 
         src.sendFeedback(Text.of("Motion Blur: " + amount + "%"));

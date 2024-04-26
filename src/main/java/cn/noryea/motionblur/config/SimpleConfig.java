@@ -23,16 +23,17 @@ package cn.noryea.motionblur.config;
  * THE SOFTWARE.
  */
 
+import com.mojang.datafixers.util.Pair;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class SimpleConfig {
@@ -43,9 +44,9 @@ public class SimpleConfig {
     private boolean broken = false;
 
     public interface DefaultConfig {
-        String get( String namespace );
+        String get(String namespace);
 
-        static String empty( String namespace ) {
+        static String empty(String namespace) {
             return "";
         }
     }
@@ -56,7 +57,7 @@ public class SimpleConfig {
         private final String filename;
         private DefaultConfig provider;
 
-        private ConfigRequest(File file, String filename ) {
+        private ConfigRequest(File file, String filename) {
             this.file = file;
             this.filename = filename;
             this.provider = DefaultConfig::empty;
@@ -70,7 +71,7 @@ public class SimpleConfig {
          * @return current config request object
          * @see DefaultConfig
          */
-        public ConfigRequest provider( DefaultConfig provider ) {
+        public ConfigRequest provider(DefaultConfig provider) {
             this.provider = provider;
             return this;
         }
@@ -82,11 +83,11 @@ public class SimpleConfig {
          * @see SimpleConfig
          */
         public SimpleConfig request() {
-            return new SimpleConfig( this );
+            return new SimpleConfig(this);
         }
 
         private String getConfig() {
-            return provider.get( filename ) + "\n";
+            return provider.get(filename);
         }
 
     }
@@ -98,89 +99,130 @@ public class SimpleConfig {
      * @param filename - name of the config file
      * @return new config request object
      */
-    public static ConfigRequest of( String filename ) {
+    public static ConfigRequest of(String filename) {
         Path path = FabricLoader.getInstance().getConfigDir();
-        return new ConfigRequest( path.resolve( filename + ".properties" ).toFile(), filename );
+        return new ConfigRequest(path.resolve(filename + ".properties").toFile(), filename);
     }
 
     private void createConfig() throws IOException {
 
         // try creating missing files
         request.file.getParentFile().mkdirs();
-        Files.createFile( request.file.toPath() );
+        Files.createFile(request.file.toPath());
 
         // write default config data
-        PrintWriter writer = new PrintWriter(request.file, "UTF-8");
-        writer.write( request.getConfig() );
-        writer.close();
+        try {
+
+            PrintWriter writer = new PrintWriter(request.file, "UTF-8");
+            writer.write(request.getConfig());
+            writer.close();
+        } catch (FileNotFoundException e) {
+            throw new FileNotFoundException();
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
     private void loadConfig() throws IOException {
-        Scanner reader = new Scanner( request.file );
-        for( int line = 1; reader.hasNextLine(); line ++ ) {
-            parseConfigEntry( reader.nextLine(), line );
+        Scanner reader = new Scanner(request.file);
+        for (int line = 1; reader.hasNextLine(); line++) {
+            parseConfigEntry(reader.nextLine(), line);
         }
     }
 
-    private void parseConfigEntry( String entry, int line ) {
-        if( !entry.isEmpty() && !entry.startsWith( "#" ) ) {
+    private void parseConfigEntry(String entry, int line) {
+        if (!entry.isEmpty() && !entry.startsWith("#")) {
             String[] parts = entry.split("=", 2);
-            if( parts.length == 2 ) {
-                config.put( parts[0], parts[1] );
-            }else{
+            if (parts.length == 2) {
+                config.put(parts[0], parts[1]);
+            } else {
                 throw new RuntimeException("Syntax error in config file on line " + line + "!");
             }
         }
     }
 
-    private SimpleConfig( ConfigRequest request ) {
+    private void updateWithProvider(MotionBlurConfigProvider configProvider) {
+        request.provider = configProvider;
+        try {
+            createConfig();
+        } catch (IOException e) {
+            LOGGER.error("Config '" + request.file + "' failed to generate!");
+            LOGGER.trace(e);
+            broken = true;
+        }
+        delete();
+    }
+
+    private SimpleConfig(ConfigRequest request) {
         this.request = request;
         String identifier = "Config '" + request.filename + "'";
 
-        if( !request.file.exists() ) {
-            //LOGGER.info( identifier + " is missing, generating default one..." );
+        if (!request.file.exists()) {
+            LOGGER.info( identifier + " is missing, generating default one..." );
 
             try {
                 createConfig();
             } catch (IOException e) {
-                LOGGER.error( identifier + " failed to generate!" );
-                LOGGER.trace( e );
+                LOGGER.error(identifier + " failed to generate!");
+                LOGGER.trace(e);
                 broken = true;
             }
         }
 
-        if( !broken ) {
+        if (!broken) {
             try {
                 loadConfig();
             } catch (Exception e) {
-                LOGGER.error( identifier + " failed to load!" );
-                LOGGER.trace( e );
+                LOGGER.error(identifier + " failed to load!");
+                LOGGER.trace(e);
                 broken = true;
             }
         }
 
     }
 
+    public void set(@NotNull String key, int value) {
+        boolean success = false;
+        MotionBlurConfigProvider configProvider = new MotionBlurConfigProvider();
+
+        //traverse all configurations
+        for (Map.Entry<String, String> entry : config.entrySet()){
+            if (!entry.getKey().equals(key)) {
+                configProvider.addKeyValuePair(new Pair<>(entry.getKey(), entry.getValue()));
+                continue;
+            }
+
+            config.put(key, "" + value);    //put new value to Hash Table
+            configProvider.addKeyValuePair(new Pair<>(key, value));
+            success = true;
+        }
+
+        //update config file
+        if (success) {
+            updateWithProvider(configProvider);
+        }
+    }
+
+
     /**
      * Queries a value from config, returns `null` if the
      * key does not exist.
      *
-     * @return  value corresponding to the given key
-     * @see     SimpleConfig#getOrDefault
+     * @return value corresponding to the given key
+     * @see SimpleConfig#getOrDefault
      */
-    @Deprecated
-    public String get( String key ) {
-        return config.get( key );
+    private String get(String key) {
+        return config.get(key);
     }
 
     /**
      * Returns string value from config corresponding to the given
      * key, or the default string if the key is missing.
      *
-     * @return  value corresponding to the given key, or the default value
+     * @return value corresponding to the given key, or the default value
      */
-    public String getOrDefault( String key, String def ) {
+    public String getOrDefault(String key, String def) {
         String val = get(key);
         return val == null ? def : val;
     }
@@ -189,40 +231,11 @@ public class SimpleConfig {
      * Returns integer value from config corresponding to the given
      * key, or the default integer if the key is missing or invalid.
      *
-     * @return  value corresponding to the given key, or the default value
+     * @return value corresponding to the given key, or the default value
      */
-    public int getOrDefault( String key, int def ) {
+    public int getOrDefault(String key, int def) {
         try {
-            return Integer.parseInt( get(key) );
-        } catch (Exception e) {
-            return def;
-        }
-    }
-
-    /**
-     * Returns boolean value from config corresponding to the given
-     * key, or the default boolean if the key is missing.
-     *
-     * @return  value corresponding to the given key, or the default value
-     */
-    public boolean getOrDefault( String key, boolean def ) {
-        String val = get(key);
-        if( val != null ) {
-            return val.equalsIgnoreCase("true");
-        }
-
-        return def;
-    }
-
-    /**
-     * Returns double value from config corresponding to the given
-     * key, or the default string if the key is missing or invalid.
-     *
-     * @return  value corresponding to the given key, or the default value
-     */
-    public double getOrDefault( String key, double def ) {
-        try {
-            return Double.parseDouble( get(key) );
+            return Integer.parseInt(get(key));
         } catch (Exception e) {
             return def;
         }
