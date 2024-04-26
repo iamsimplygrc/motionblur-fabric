@@ -6,19 +6,12 @@ import java.util.List;
 
 public class MotionBlurConfigProvider implements SimpleConfig.DefaultConfig {
     private String configContents = "";
-    private final List<Pair> configsList = new ArrayList<>();
 
-    public List<Pair> getConfigsList() {
-        return configsList;
-    }
-
-    public void
-    addKeyValuePair(Pair<String, ?> keyValuePair, String comment) {
-        configsList.add(keyValuePair);
-        configContents += keyValuePair.getFirst() + "=" + keyValuePair.getSecond();
+    public void addKeyValuePair(Pair<String, ?> keyValuePair) {
+        configContents += keyValuePair.getFirst() + "=" + keyValuePair.getSecond() + "\n";
     }
 
     @Override public String get(String namespace) {
-        return configContents;
+        return "#" + namespace + " config\n" + configContents;
     }
 }
