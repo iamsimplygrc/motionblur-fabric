@@ -47,9 +47,9 @@ dependencies {
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
 
 	modIncludeImplementation "io.github.ladysnake:satin:${satin_version}"
-	modIncludeImplementation(fabricApi.module("fabric-command-api-v1", project.fabric_version))
 }
 
 loom {
@@ -95,7 +95,7 @@ jar {
     }
 
 String getVersion() {
-	String version = "${project.mod_version}+mc${project.minecraft_version}"
+	String version = "${project.mod_version}+mc1.16.x"
 
 	return version
 }
