@@ -49,7 +49,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	modImplementation "io.github.ladysnake:satin:${satin_version}"
-	modIncludeImplementation(fabricApi.module("fabric-command-api-v1", project.fabric_version))
+	modImplementation(fabricApi.module("fabric-command-api-v2", project.fabric_version))
 }
 
 loom {
@@ -95,7 +95,7 @@ jar {
     }
 
 String getVersion() {
-	String version = "${project.mod_version}+mc${project.minecraft_version}"
+	String version = "${project.mod_version}+mc1.19-1.20.x"
 
 	return version
 }

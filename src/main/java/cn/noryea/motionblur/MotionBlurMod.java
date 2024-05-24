@@ -6,8 +6,9 @@ import ladysnake.satin.api.event.ShaderEffectRenderCallback;
 import ladysnake.satin.api.managed.ManagedShaderEffect;
 import ladysnake.satin.api.managed.ShaderEffectManager;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
-import net.fabricmc.fabric.api.client.command.v1.FabricClientCommandSource;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -23,11 +24,11 @@ public class MotionBlurMod implements ClientModInitializer {
     public void onInitializeClient() {
         MotionBlurConfig.registerConfigs(50);
 
-        ClientCommandManager.DISPATCHER.register(
+        ClientCommandRegistrationCallback.EVENT.register((callback, a) -> callback.register(
                 ClientCommandManager.literal("motionblur")
-                    .then(ClientCommandManager.argument("percent", IntegerArgumentType.integer(0, 100))
-                        .executes(context -> changeAmount(context.getSource(), IntegerArgumentType.getInteger(context, "percent"))))
-        );
+                        .then(ClientCommandManager.argument("percent", IntegerArgumentType.integer(0, 100))
+                                .executes(context -> changeAmount(context.getSource(), IntegerArgumentType.getInteger(context, "percent"))))
+        ));
 
         ShaderEffectRenderCallback.EVENT.register((deltaTick) -> {
             if (getBlur() != 0) {

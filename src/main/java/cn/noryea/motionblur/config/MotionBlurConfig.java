@@ -9,7 +9,7 @@ public class MotionBlurConfig {
 
     public static SimpleConfig CONFIG;
 
-    public static int MOTIONBLUR_AMOUNT;  //是动态模糊量
+    public static int MOTIONBLUR_AMOUNT;
 
     public static void registerConfigs(int amount) {
         MotionBlurConfigProvider provider = new MotionBlurConfigProvider();
