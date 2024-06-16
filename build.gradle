@@ -1,10 +1,10 @@
 plugins {
-	id 'fabric-loom' version '1.5.2'
+	id 'fabric-loom' version '1.6-SNAPSHOT'
 	id 'io.github.juuxel.loom-quiltflower' version '1.7.2'
 }
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+sourceCompatibility = JavaVersion.VERSION_21
+targetCompatibility = JavaVersion.VERSION_21
 
 archivesBaseName = project.archives_base_name
 version = getVersion()
@@ -95,7 +95,7 @@ jar {
     }
 
 String getVersion() {
-	String version = "${project.mod_version}+mc1.19-1.20.x"
+	String version = "${project.mod_version}+mc${project.minecraft_version}"
 
 	return version
 }

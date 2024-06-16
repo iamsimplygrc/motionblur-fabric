@@ -3,7 +3,7 @@
   "id": "motionblur",
   "version": "${version}",
   "name": "Motion Blur",
-  "description": "New Motion Blur Mod.",
+  "description": "A Motion Blur Mod for Fabric, based on Satin API.",
   "authors": [
     "Noryea"
   ],
@@ -21,9 +21,10 @@
   },
   "mixins": [],
   "depends": {
+    "minecraft": "1.21.x",
     "fabricloader": ">=0.11.3",
     "fabric-command-api-v2": "*",
     "satin": "*",
-    "java": ">=17"
+    "java": ">=21"
   }
 }

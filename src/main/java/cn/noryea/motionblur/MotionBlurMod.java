@@ -2,22 +2,22 @@ package cn.noryea.motionblur;
 
 import cn.noryea.motionblur.config.MotionBlurConfig;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
-import ladysnake.satin.api.event.ShaderEffectRenderCallback;
-import ladysnake.satin.api.managed.ManagedShaderEffect;
-import ladysnake.satin.api.managed.ShaderEffectManager;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.ladysnake.satin.api.event.ShaderEffectRenderCallback;
+import org.ladysnake.satin.api.managed.ManagedShaderEffect;
+import org.ladysnake.satin.api.managed.ShaderEffectManager;
 
 public class MotionBlurMod implements ClientModInitializer {
 
     public static String ID = "motionblur";
     private float currentBlur;
 
-    private final ManagedShaderEffect motionblur = ShaderEffectManager.getInstance().manage(new Identifier(ID, "shaders/post/motion_blur.json"),
+    private final ManagedShaderEffect motionblur = ShaderEffectManager.getInstance().manage(Identifier.of(ID, "shaders/post/motion_blur.json"),
             shader -> shader.setUniformValue("BlendFactor", getBlur()));
 
     @Override
