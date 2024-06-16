@@ -3,8 +3,6 @@ package cn.noryea.motionblur.config;
 import cn.noryea.motionblur.MotionBlurMod;
 import com.mojang.datafixers.util.Pair;
 
-import java.io.IOException;
-
 public class MotionBlurConfig {
 
     public static SimpleConfig CONFIG;

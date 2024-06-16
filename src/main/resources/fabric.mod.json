@@ -24,7 +24,6 @@
     "minecraft": "1.21.x",
     "fabricloader": ">=0.11.3",
     "fabric-command-api-v2": "*",
-    "satin": "*",
-    "java": ">=21"
+    "satin": "*"
   }
 }
